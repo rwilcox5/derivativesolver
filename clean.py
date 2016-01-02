@@ -2,7 +2,19 @@ def cleanpar(inputexpression, dvar):
 	inputexpression = inputexpression.replace(' ','')
 	if inputexpression[0]=='(':
 		if inputexpression[len(inputexpression)-1]==')':
-			inputexpression = inputexpression[1:len(inputexpression)-1]
+			justenough = 0
+			openpar = 0
+			for i in inputexpression[:len(inputexpression)-2]:
+				if i =='(':
+					openpar = openpar+1
+				elif i == ')':
+					openpar = openpar-1
+				if openpar < 0:
+					print "too many closing parentheses"
+				elif openpar == 0:
+					justenough = 1
+			if justenough !=1:
+				inputexpression = inputexpression[1:len(inputexpression)-1]
 
 	openpar = 0
 	isbreak = 0
@@ -20,7 +32,7 @@ def cleanpar(inputexpression, dvar):
 									if inputexpression[idx-1]!='(':
 										inputexpression=inputexpression[0:idx]+'*'+inputexpression[idx:]
 										#print inputexpression
-										inputexpression = cleanpar(inputexpression,dvar)[0]
+										inputexpression = cleanpar(inputexpression,dvar)
 										cancelnext = 1
 										break
 	if cancelnext != 1:
@@ -35,11 +47,11 @@ def cleanpar(inputexpression, dvar):
 										if inputexpression[idx-1]!='-':
 											inputexpression=inputexpression[0:idx]+'*'+inputexpression[idx:]
 											#print inputexpression
-											inputexpression = cleanpar(inputexpression,dvar)[0]
+											inputexpression = cleanpar(inputexpression,dvar)
 											cancelnext = 1
 											break
 
-	return [inputexpression,dvar]
+	return inputexpression
 
 #print cleanpar('1/3x^2*abc/(1+2)/ x*4(1+x)(x+1-3)*(x)/(1+1)x','x')
 
