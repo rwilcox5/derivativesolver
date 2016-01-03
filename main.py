@@ -10,17 +10,20 @@ from clean import post_clean
 from trigrule import trigrule
 from quorule import quorule
 import sympy
-inputexpression = 'xx^4(x+1)'
+inputexpression = '(x+1)^5+log(x)(e^x+1)'
 dvar = 'x'
 ycount = 0
 stopnow = 0
+allsteps = []
 def slatex(f):
 	return sympy.latex(sympy.sympify(post_clean(f)))
 def inversetrigrule(inputexpression,dvar):
 	return [False,inputexpression]
 
-def derivative(inputexpression,dvar):
-	global ycount, stopnow
+def derivative(inputexpression,dvar,ycount):
+	global allsteps
+	ofunction = cleanpar(inputexpression,dvar)
+	allsteps.append([ycount, 'd['+ofunction+']=',ofunction])
 	f = cleanpar(inputexpression,dvar)
 	#print slatex(f)
 	h = pulloutconstant(f,dvar)
@@ -32,14 +35,13 @@ def derivative(inputexpression,dvar):
 		h = sumrule(f,[],dvar)
 		if len(h)>1:
 			#Here if can use sum rule
+			ycount =ycount+1
 			f = ''
+			#print h
 			for idx, i in enumerate(h):
 				if idx %2==0:
-					if derivative(i,dvar)==i:
-						f=f+i
-					else:
-						#print f, derivative(i,dvar), i
-						f=f+derivative(i,dvar)
+					#print f, i, h
+					f=f+derivative(i,dvar,ycount)
 				else:
 					if i==0:
 						f=f+'+'
@@ -73,26 +75,31 @@ def derivative(inputexpression,dvar):
 							
 							if h[0]:
 								#Here if quotient rule applied
+								ycount=ycount+1
 								if h[1]=='1':
 									f='(-('+derivative(h[2],dvar)+'))/('+h[2]+')^2'
 								elif h[1]==dvar:
-									f='(('+h[2]+')-('+h[1]+')*('+derivative(h[2],dvar)+'))/('+h[2]+')^2'
+									f='(('+h[2]+')-('+h[1]+')*('+derivative(h[2],dvar,ycount)+'))/('+h[2]+')^2'
 								elif h[2]==dvar:
-									f='(('+h[2]+')*('+derivative(h[1],dvar)+')-('+h[1]+'))/('+h[2]+')^2'
+									f='(('+h[2]+')*('+derivative(h[1],dvar,ycount)+')-('+h[1]+'))/('+h[2]+')^2'
 								else:
-									f='(('+h[2]+')*('+derivative(h[1],dvar)+')-('+h[1]+')*('+derivative(h[2],dvar)+'))/('+h[2]+')^2'
+									f='(('+h[2]+')*('+derivative(h[1],dvar,ycount)+')-('+h[1]+')*('+derivative(h[2],dvar,ycount)+'))/('+h[2]+')^2'
 							else:
 								#Here if no quotient rule applied
 								f=h[1]
 								h = productrule(f,[],dvar)
 								if len(h)>1:
-									f=h[0]+'*('+derivative(h[1],dvar)+')+'+h[1]+'*('+derivative(h[0],dvar)+')'
+									#Here if porduct Rule
+									ycount =ycount+1
+									f=h[0]+'*('+derivative(h[1],dvar,ycount)+')+'+h[1]+'*('+derivative(h[0],dvar,ycount)+')'
 								else:
 									#Here if product rule fails
 									f = h[0]
 									h = chainrule(f,dvar)
 									if h[0]:
-										inside_derivative = derivative(h[2],dvar)
+										#Here if chain rule works
+										ycount =ycount+1
+										inside_derivative = derivative(h[2],dvar,ycount)
 										try:
 											if float(inside_derivative)==1:
 												f=h[1]
@@ -113,15 +120,110 @@ def derivative(inputexpression,dvar):
 												f = h[1]+'*'+inside_derivative
 									else:
 										#Here if chain rule fails
+										print "no Derivative", h[1]
 										f = h[1]
 	#print f
 	#print sympy.latex(sympy.sympify(post_clean(f)))
 	#tret = sympy.latex(sympy.sympify(post_clean(f)))
+	print ycount, cleanpar(f,dvar)
 	return cleanpar(f,dvar)
+def onestepderivative(inputexpression,dvar,ycount):
+	f = cleanpar(inputexpression,dvar)
+	#print slatex(f)
+	h = pulloutconstant(f,dvar)
+	if h[0]!=1:
+		f = h[0]+'*('+derivative(h[1],dvar)+')'
+	else:
+		#Here if cannot pull out a constant
+		f=h[1]
+		h = sumrule(f,[],dvar)
+		if len(h)>1:
+			#Here if can use sum rule
+			ycount =ycount+1
+			f = ''
+			#print h
+			for idx, i in enumerate(h):
+				if idx %2==0:
+					#print f, i, h
+					f=f+'derivative('+i+')'
+				else:
+					if i==0:
+						f=f+'+'
+					else:
+						f=f+'-'
+		else:
+			#Here if cannot use sum rule
+			h = powerrule(f,dvar)
+			if h[0]:
+				#Here if can use power rule
+				f= h[1]
+			else:
+				#Here if cannot use power rule
+				f = h[1]
+				h = expologrule(f,dvar)
+				if h[0]:
+					f=h[1]
+				else:
+					f = h[1]
+					h = trigrule(f,dvar)
+					if h[0]:
+						f=h[1]
+					else:
+						f = h[1]
+						h = inversetrigrule(f,dvar)
+						if h[0]:
+							f=h[1]
+						else:
+							f = h[1]
+							h = quorule(f,dvar)
+							
+							if h[0]:
+								#Here if quotient rule applied
+								ycount=ycount+1
+								if h[1]=='1':
+									f='(-('+'derivative('+h[2]+')'+'))/('+h[2]+')^2'
+								elif h[1]==dvar:
+									f='(('+h[2]+')-('+h[1]+')*('+'derivative('+h[2]+')'+'))/('+h[2]+')^2'
+								elif h[2]==dvar:
+									f='(('+h[2]+')*('+'derivative('+h[1]+')'+')-('+h[1]+'))/('+h[2]+')^2'
+								else:
+									f='(('+h[2]+')*('+'derivative('+h[1]+')'+')-('+h[1]+')*('+'derivative('+h[2]+')'+'))/('+h[2]+')^2'
+							else:
+								#Here if no quotient rule applied
+								f=h[1]
+								h = productrule(f,[],dvar)
+								if len(h)>1:
+									#Here if porduct Rule
+									ycount =ycount+1
+									f=h[0]+'*('+'derivative('+h[1]+')'+')+'+h[1]+'*('+'derivative('+h[0]+')'+')'
+								else:
+									#Here if product rule fails
+									f = h[0]
+									h = chainrule(f,dvar)
+									if h[0]:
+										#Here if chain rule works
+										ycount =ycount+1
+										
+										f=h[1]+'*'+'derivative('+h[2]+')'
+									else:
+										#Here if chain rule fails
+										print "no Derivative", h[1]
+										f = h[1]
+	#print f
+	#print sympy.latex(sympy.sympify(post_clean(f)))
+	#tret = sympy.latex(sympy.sympify(post_clean(f)))
+	#print ycount, cleanpar(f,dvar)
+	return f
 
-the_derivative = derivative(inputexpression,dvar)
+the_derivative = derivative(inputexpression,dvar,0)
 print sympy.latex(sympy.sympify(the_derivative))
 
+
+for i in allsteps:
+	my_str = ''
+	for ii in range(0,i[0]):
+		my_str=my_str+'   '
+	print my_str+i[1]+onestepderivative(i[2],dvar,0)
 
 print asdfsdf
 def cleanconstant(inputexpression,dvar):
