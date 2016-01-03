@@ -100,10 +100,28 @@ def checklog(inputexpression,dvar):
 			return [False, inputexpression]
 	else:
 		return [False,inputexpression]
+def checktrig(inputexpression,dvar,tf,dtf):
+	if inputexpression[:4]==tf+'(':
+		if fullparen(inputexpression[3:]):
+			the_exponent = inputexpression[4:len(inputexpression)-1]
+			if the_exponent.find(dvar,0)>-1:
+				if dtf not in ['-csccot','sectan']:
+					return [True,dtf+'('+the_exponent+')',the_exponent]
+				else:
+					return [True,dtf[:len(dtf)-3]+'('+the_exponent+')'+dtf[len(dtf)-3:]+'('+the_exponent+')',the_exponent]
+			else:
+				return [False, inputexpression]
+		else:
+			return [False, inputexpression]
+	else:
+		return [False,inputexpression]
 def chainrule(inputexpression,dvar):
 	expo_chain = checkexpo(inputexpression,dvar)
 	log_chain = checklog(inputexpression,dvar)
 	power_chain = checkpower(inputexpression,dvar)
+	trig_chain = []
+	for tf,dtf in [['sin','cos'],['cos','-sin'],['tan','sec^2'],['csc','-csccot'],['sec','sectan'],['cot','-csc^2']]:
+		trig_chain.append(checktrig(inputexpression,dvar,tf,dtf))
 	if expo_chain[0]:
 		return expo_chain
 	elif log_chain[0]:
@@ -111,4 +129,7 @@ def chainrule(inputexpression,dvar):
 	elif power_chain[0]:
 		return power_chain
 	else:
-		return [False, inputexpression]
+		for i in range(0,len(trig_chain)):
+			if trig_chain[i][0]:
+				return trig_chain[i]
+	return [False, inputexpression]

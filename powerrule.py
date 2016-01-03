@@ -55,10 +55,10 @@ def powerrule(inputexpression,dvar):
 								else:
 									return [True,str(the_exponent)+'*'+dvar+'^('+str(the_exponent-1)+')']
 							else:
-								print the_exponent, 'aa'
+								#print the_exponent, 'aa'
 								if fullparen(the_exponent):
 									return [True,the_exponent+'*'+dvar+'^('+the_exponent[1:len(the_exponent)-1]+'-1)']
-								elif the_exponent.find('+',0)+the_exponent.find('-',0)==-2:
+								elif the_exponent.find('+',0)+the_exponent.find('-',0)+the_exponent.find('*',0)+the_exponent.find('/',0)+the_exponent.find('(',0)==-5:
 									return [True,the_exponent+'*'+dvar+'^('+the_exponent+'-1)']
 								else:
 									return [False,inputexpression]
@@ -68,7 +68,7 @@ def powerrule(inputexpression,dvar):
 									return [True,the_exponent+'*'+dvar+'^('+the_exponent[1:len(the_exponent)-1]+'-1)']
 								else:
 									return [True,the_exponent+'*'+dvar+'^('+the_exponent+'-1)']
-							elif the_exponent.find('+',0)+the_exponent.find('-',0)==-2:
+							elif the_exponent.find('+',0)+the_exponent.find('-',0)+the_exponent.find('*',0)+the_exponent.find('/',0)+the_exponent.find('(',0)==-5:
 								return [True,the_exponent+'*'+dvar+'^('+the_exponent+'-1)']
 							else:
 								return [False,inputexpression]
@@ -78,7 +78,7 @@ def powerrule(inputexpression,dvar):
 								return [True,the_exponent+'*'+dvar+'^('+the_exponent[1:len(the_exponent)-1]+'-1)']
 							else:
 								return [True,the_exponent+'*'+dvar+'^('+the_exponent+'-1)']
-						elif the_exponent.find('+',0)+the_exponent.find('-',0)==-2:
+						elif the_exponent.find('+',0)+the_exponent.find('-',0)+the_exponent.find('*',0)+the_exponent.find('/',0)+the_exponent.find('(',0)==-5:
 							return [True,the_exponent+'*'+dvar+'^('+the_exponent+'-1)']
 						else:
 							return [False,inputexpression]

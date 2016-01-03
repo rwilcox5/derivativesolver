@@ -1,3 +1,4 @@
+import sympy
 def fullparen(input_string):
 	openpar = 0
 	isbreak = 0
@@ -16,7 +17,9 @@ def fullparen(input_string):
 		return True
 	else:
 		return False
-def cleanpar(inputexpression, dvar):
+def cleanp(inputexpression, dvar):
+	if inputexpression[0]=='/':
+		inputexpression='1'+inputexpression
 	inputexpression = inputexpression.replace(' ','')
 	if inputexpression[0]=='(':
 		if inputexpression[len(inputexpression)-1]==')':
@@ -49,11 +52,17 @@ def cleanpar(inputexpression, dvar):
 								if inputexpression[idx-1]!='-':
 									if inputexpression[idx-1]!='(':
 										if inputexpression[idx-3:idx]!='log':
-											inputexpression=inputexpression[0:idx]+'*'+inputexpression[idx:]
-											#print inputexpression
-											inputexpression = cleanpar(inputexpression,dvar)
-											cancelnext = 1
-											break
+											if inputexpression[idx-3:idx]!='sin':
+												if inputexpression[idx-3:idx]!='cos':
+													if inputexpression[idx-3:idx]!='tan':
+														if inputexpression[idx-3:idx]!='sec':
+															if inputexpression[idx-3:idx]!='csc':
+																if inputexpression[idx-3:idx]!='cot':
+																	inputexpression=inputexpression[0:idx]+'*'+inputexpression[idx:]
+																	#print inputexpression
+																	inputexpression = cleanpar(inputexpression,dvar)
+																	cancelnext = 1
+																	break
 	if cancelnext != 1:
 		for idx,i in enumerate(inputexpression):
 			#if i in ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']:
@@ -70,17 +79,28 @@ def cleanpar(inputexpression, dvar):
 											inputexpression = cleanpar(inputexpression,dvar)
 											cancelnext = 1
 											break
-
+	#print 'xxx', inputexpression, str(sympy.sympify(inputexpression))
 	return inputexpression
 
 #print cleanpar('1/3x^2*abc/(1+2)/ x*4(1+x)(x+1-3)*(x)/(1+1)x','x')
-
+def cleanpar(f,dvar):
+	f=cleanp(f,dvar)
+	f=str(sympy.sympify(f))
+	f=f.replace("**","^")
+	f=cleanp(f,dvar)
+	return f
 def post_clean(f):
+	f=f.replace('+-','-')
 	try:
 		f = str(eval(f))
 	except:
 		if fullparen(f):
-			f = f[1:len(f)-1]
+			if len(f)>1:
+				f = f[1:len(f)-1]
+				try:
+					f = str(eval(f))
+				except:
+					pass
 	return f
 
 

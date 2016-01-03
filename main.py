@@ -7,18 +7,22 @@ from powerrule import powerrule
 from chainrule import chainrule
 from expolog import expologrule
 from clean import post_clean
-inputexpression = 'log(2x^3)+x^a'
+from trigrule import trigrule
+from quorule import quorule
+import sympy
+inputexpression = 'xx^4(x+1)'
 dvar = 'x'
 ycount = 0
 stopnow = 0
+def slatex(f):
+	return sympy.latex(sympy.sympify(post_clean(f)))
 def inversetrigrule(inputexpression,dvar):
 	return [False,inputexpression]
-def trigrule(inputexpression,dvar):
-	return [False,inputexpression]
+
 def derivative(inputexpression,dvar):
 	global ycount, stopnow
 	f = cleanpar(inputexpression,dvar)
-	#print f
+	#print slatex(f)
 	h = pulloutconstant(f,dvar)
 	if h[0]!=1:
 		f = h[0]+'*('+derivative(h[1],dvar)+')'
@@ -65,39 +69,60 @@ def derivative(inputexpression,dvar):
 							f=h[1]
 						else:
 							f = h[1]
-							h = productrule(f,[],dvar)
-							if len(h)>1:
-								f=h[0]+'*('+derivative(h[1],dvar)+')+'+h[1]+'*('+derivative(h[0],dvar)+')'
-							else:
-								#Here if product rule fails
-								f = h[0]
-								h = chainrule(f,dvar)
-								if h[0]:
-									inside_derivative = derivative(h[2],dvar)
-									try:
-										if float(inside_derivative)==1:
-											f=h[1]
-										elif float(inside_derivative)==0:
-											f='0'
-										else:
-											inside_derivative=float(inside_derivative)
-											if inside_derivative==int(inside_derivative):
-												f=h[1]+'*'+str(int(inside_derivative))
-											else:
-												f=h[1]+'*'+str(float(inside_derivative))
-									except:
-										if inside_derivative.find('+',0)>-1:
-											f = h[1]+'*('+inside_derivative+')'
-										elif inside_derivative.find('-',0)>-1:
-											f = h[1]+'*('+inside_derivative+')'
-										else:
-											f = h[1]+'*'+inside_derivative
+							h = quorule(f,dvar)
+							
+							if h[0]:
+								#Here if quotient rule applied
+								if h[1]=='1':
+									f='(-('+derivative(h[2],dvar)+'))/('+h[2]+')^2'
+								elif h[1]==dvar:
+									f='(('+h[2]+')-('+h[1]+')*('+derivative(h[2],dvar)+'))/('+h[2]+')^2'
+								elif h[2]==dvar:
+									f='(('+h[2]+')*('+derivative(h[1],dvar)+')-('+h[1]+'))/('+h[2]+')^2'
 								else:
-									#Here if chain rule fails
-									f = h[1]
-	return post_clean(f)
+									f='(('+h[2]+')*('+derivative(h[1],dvar)+')-('+h[1]+')*('+derivative(h[2],dvar)+'))/('+h[2]+')^2'
+							else:
+								#Here if no quotient rule applied
+								f=h[1]
+								h = productrule(f,[],dvar)
+								if len(h)>1:
+									f=h[0]+'*('+derivative(h[1],dvar)+')+'+h[1]+'*('+derivative(h[0],dvar)+')'
+								else:
+									#Here if product rule fails
+									f = h[0]
+									h = chainrule(f,dvar)
+									if h[0]:
+										inside_derivative = derivative(h[2],dvar)
+										try:
+											if float(inside_derivative)==1:
+												f=h[1]
+											elif float(inside_derivative)==0:
+												f='0'
+											else:
+												inside_derivative=float(inside_derivative)
+												if inside_derivative==int(inside_derivative):
+													f=h[1]+'*'+str(int(inside_derivative))
+												else:
+													f=h[1]+'*'+str(float(inside_derivative))
+										except:
+											if inside_derivative.find('+',0)>-1:
+												f = h[1]+'*('+inside_derivative+')'
+											elif inside_derivative.find('-',0)>-1:
+												f = h[1]+'*('+inside_derivative+')'
+											else:
+												f = h[1]+'*'+inside_derivative
+									else:
+										#Here if chain rule fails
+										f = h[1]
+	#print f
+	#print sympy.latex(sympy.sympify(post_clean(f)))
+	#tret = sympy.latex(sympy.sympify(post_clean(f)))
+	return cleanpar(f,dvar)
 
-print derivative(inputexpression,dvar)
+the_derivative = derivative(inputexpression,dvar)
+print sympy.latex(sympy.sympify(the_derivative))
+
+
 print asdfsdf
 def cleanconstant(inputexpression,dvar):
 	cleaned = cleanpar(inputexpression,dvar)
