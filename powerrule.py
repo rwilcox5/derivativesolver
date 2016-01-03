@@ -1,3 +1,21 @@
+def fullparen(input_string):
+	openpar = 0
+	isbreak = 0
+	cancel_it = 0
+	really_cancel = 0
+	for idx,i in enumerate(input_string):
+		if i == '(':
+			openpar = openpar+1
+		elif i == ')':
+			openpar = openpar-1
+		if openpar == 0:
+			cancel_it = 1
+			isbreak = idx
+			break
+	if isbreak == len(input_string)-1:
+		return True
+	else:
+		return False
 def powerrule(inputexpression,dvar):
 	#print inputexpression, dvar
 	if len(inputexpression)>len(dvar)+1:
@@ -10,9 +28,14 @@ def powerrule(inputexpression,dvar):
 					the_exponent = float(the_exponent)
 					if int(the_exponent)==float(the_exponent):
 						the_exponent=int(the_exponent)
-						return str(the_exponent)+'*'+dvar+'^('+str(the_exponent-1)+')'
+						if the_exponent-1 == 1:
+							return [True,str(the_exponent)+'*'+dvar]
+						elif the_exponent-1==0:
+							return [True,str(the_exponent)]
+						else:
+							return [True,str(the_exponent)+'*'+dvar+'^'+str(the_exponent-1)]
 					else:
-						return str(the_exponent)+'*'+dvar+'^('+str(the_exponent-1)+')'
+						return [True,str(the_exponent)+'*'+dvar+'^'+str(the_exponent-1)]
 					#print 'hereee'
 				except:
 					try:
@@ -22,25 +45,53 @@ def powerrule(inputexpression,dvar):
 								the_exponent = float(the_exponent)
 								if int(the_exponent)==float(the_exponent):
 									the_exponent=int(the_exponent)
-									return str(the_exponent)+'*'+dvar+'^('+str(the_exponent-1)+')'
+									if the_exponent-1 == 1:
+										return [True,str(the_exponent)+'*'+dvar]
+									elif the_exponent-1==0:
+										return [True,str(the_exponent)]
+									else:
+										return [True,str(the_exponent)+'*'+dvar+'^'+str(the_exponent-1)]
+
 								else:
-									return str(the_exponent)+'*'+dvar+'^('+str(the_exponent-1)+')'
+									return [True,str(the_exponent)+'*'+dvar+'^('+str(the_exponent-1)+')']
 							else:
-								return inputexpression
+								print the_exponent, 'aa'
+								if fullparen(the_exponent):
+									return [True,the_exponent+'*'+dvar+'^('+the_exponent[1:len(the_exponent)-1]+'-1)']
+								elif the_exponent.find('+',0)+the_exponent.find('-',0)==-2:
+									return [True,the_exponent+'*'+dvar+'^('+the_exponent+'-1)']
+								else:
+									return [False,inputexpression]
 						else:
-							return inputexpression
+							if fullparen(the_exponent):
+								if len(the_exponent)>1:
+									return [True,the_exponent+'*'+dvar+'^('+the_exponent[1:len(the_exponent)-1]+'-1)']
+								else:
+									return [True,the_exponent+'*'+dvar+'^('+the_exponent+'-1)']
+							elif the_exponent.find('+',0)+the_exponent.find('-',0)==-2:
+								return [True,the_exponent+'*'+dvar+'^('+the_exponent+'-1)']
+							else:
+								return [False,inputexpression]
 					except:
-						return inputexpression
+						if fullparen(the_exponent):
+							if len(the_exponent)>1:
+								return [True,the_exponent+'*'+dvar+'^('+the_exponent[1:len(the_exponent)-1]+'-1)']
+							else:
+								return [True,the_exponent+'*'+dvar+'^('+the_exponent+'-1)']
+						elif the_exponent.find('+',0)+the_exponent.find('-',0)==-2:
+							return [True,the_exponent+'*'+dvar+'^('+the_exponent+'-1)']
+						else:
+							return [False,inputexpression]
 			else:
-				return inputexpression
+				return [False,inputexpression]
 		else:
-			return inputexpression
+			return [False,inputexpression]
 	elif inputexpression == dvar:
-		return '1'
+		return [True,'1']
 	elif inputexpression.find(dvar,0)<0:
-		return '0'
+		return [True,'0']
 	else:
-		return inputexpression
+		return [False,inputexpression]
 
 
 

@@ -5,58 +5,97 @@ from constantmultiple import pulloutconstant
 from productrule import productrule
 from powerrule import powerrule
 from chainrule import chainrule
-inputexpression = '3x^2+x^1*x^4+x(x^2+1)^(2)'
+from expolog import expologrule
+from clean import post_clean
+inputexpression = 'log(2x^3)+x^a'
 dvar = 'x'
 ycount = 0
 stopnow = 0
+def inversetrigrule(inputexpression,dvar):
+	return [False,inputexpression]
+def trigrule(inputexpression,dvar):
+	return [False,inputexpression]
 def derivative(inputexpression,dvar):
 	global ycount, stopnow
 	f = cleanpar(inputexpression,dvar)
 	#print f
 	h = pulloutconstant(f,dvar)
-	if h[0]==1:
-		f = h[1]
-	else:
+	if h[0]!=1:
 		f = h[0]+'*('+derivative(h[1],dvar)+')'
-	#print f, h
-	h = sumrule(f,[],dvar)
-	if len(h)>1:
-		f = ''
-		for idx, i in enumerate(h):
-			if idx %2==0:
-				if derivative(i,dvar)==i:
-					f=f+i
+	else:
+		#Here if cannot pull out a constant
+		f=h[1]
+		h = sumrule(f,[],dvar)
+		if len(h)>1:
+			#Here if can use sum rule
+			f = ''
+			for idx, i in enumerate(h):
+				if idx %2==0:
+					if derivative(i,dvar)==i:
+						f=f+i
+					else:
+						#print f, derivative(i,dvar), i
+						f=f+derivative(i,dvar)
 				else:
-					print f, derivative(i,dvar), i
-					f=f+derivative(i,dvar)
+					if i==0:
+						f=f+'+'
+					else:
+						f=f+'-'
+		else:
+			#Here if cannot use sum rule
+			h = powerrule(f,dvar)
+			if h[0]:
+				#Here if can use power rule
+				f= h[1]
 			else:
-				if i==0:
-					f=f+'+'
+				#Here if cannot use power rule
+				f = h[1]
+				h = expologrule(f,dvar)
+				if h[0]:
+					f=h[1]
 				else:
-					f=f+'-'
-	h = productrule(f,[],dvar)
-	if len(h)>1:
-		if stopnow == 1:
-			f = h[0]
-		else:
-			f=h[0]+'*('+derivative(h[1],dvar)+')+'+h[1]+'*('+derivative(h[0],dvar)+')'
-			#ycount = ycount+1
-			#print f, "AAA", h
-			#if ycount > 10:
-			#	stopnow = 1
-	else:
-		f = h[0]
-	h = powerrule(f,dvar)
-	f = h
-	h = chainrule(f,dvar)
-	if len(h)>1:
-		if h[1]=='derivative':
-			f = h[0]+'*('+derivative(h[2],dvar)+')'
-		else:
-			f=h
-	else:
-		f = h
-	return f
+					f = h[1]
+					h = trigrule(f,dvar)
+					if h[0]:
+						f=h[1]
+					else:
+						f = h[1]
+						h = inversetrigrule(f,dvar)
+						if h[0]:
+							f=h[1]
+						else:
+							f = h[1]
+							h = productrule(f,[],dvar)
+							if len(h)>1:
+								f=h[0]+'*('+derivative(h[1],dvar)+')+'+h[1]+'*('+derivative(h[0],dvar)+')'
+							else:
+								#Here if product rule fails
+								f = h[0]
+								h = chainrule(f,dvar)
+								if h[0]:
+									inside_derivative = derivative(h[2],dvar)
+									try:
+										if float(inside_derivative)==1:
+											f=h[1]
+										elif float(inside_derivative)==0:
+											f='0'
+										else:
+											inside_derivative=float(inside_derivative)
+											if inside_derivative==int(inside_derivative):
+												f=h[1]+'*'+str(int(inside_derivative))
+											else:
+												f=h[1]+'*'+str(float(inside_derivative))
+									except:
+										if inside_derivative.find('+',0)>-1:
+											f = h[1]+'*('+inside_derivative+')'
+										elif inside_derivative.find('-',0)>-1:
+											f = h[1]+'*('+inside_derivative+')'
+										else:
+											f = h[1]+'*'+inside_derivative
+								else:
+									#Here if chain rule fails
+									f = h[1]
+	return post_clean(f)
 
 print derivative(inputexpression,dvar)
 print asdfsdf
