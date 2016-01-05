@@ -23,7 +23,8 @@ def inversetrigrule(inputexpression,dvar):
 def derivative(inputexpression,dvar,ycount):
 	global allsteps
 	ofunction = cleanpar(inputexpression,dvar)
-	allsteps.append([ycount, 'd['+ofunction+']=',ofunction])
+	print ofunction
+	allsteps.append([ycount, 'd['+sympy.latex(sympy.sympify(ofunction))+']=',ofunction])
 	f = cleanpar(inputexpression,dvar)
 	#print slatex(f)
 	h = pulloutconstant(f,dvar)
@@ -360,12 +361,27 @@ for idx,i in enumerate(allsteps):
 
 numruns = 0
 #print "let's see"
+show_all = []
+for i in allsteps:
+	show_all.append(' \\newline ')
+
+def allof(show_all):
+	mystr = ''
+	for i in show_all:
+		mystr=mystr+i
+	return mystr
+
 previous_stuff = '$'+allsteps[0][1]+'$\\newline $'
-print '$'+allsteps[0][1]+'$\\newpage '
+show_all[0]='$'+allsteps[0][1]+'$'
+print allof(show_all)+'\\newpage '
+#print '$'+allsteps[0][1]+'$\\newpage '
 def solve_steps(allsteps,solveid,show_children,dvar):
 	global previous_stuff
-	#print solveid
-
+	#print solveid, 'xxxxx'
+	if allsteps[solveid][3]!='solved':
+		if show_all[solveid]!= '\\newline $\hspace*{'+str(allsteps[solveid][0])+'em} '+allsteps[solveid][1]+onestepderivative(allsteps[solveid][2],dvar,0)+'$':
+			show_all[solveid]= '\\newline $\hspace*{'+str(allsteps[solveid][0])+'em} '+allsteps[solveid][1]+onestepderivative(allsteps[solveid][2],dvar,0)+'$'
+			print allof(show_all)+'\\newpage '
 	level = allsteps[solveid][0]
 	rangemin= solveid+1
 	if allsteps[solveid][4] !="":
@@ -383,11 +399,18 @@ def solve_steps(allsteps,solveid,show_children,dvar):
 		for idx,i in enumerate(allsteps[rangemin:rangemax]):
 			if i[0]==level+1:
 				if i[3]=="solved":
-					print previous_stuff+i[1]+sympy.latex(sympy.sympify(fullderivative(i[2],dvar,0)))+'\\newpage'
-					previous_stuff = previous_stuff+i[1]+sympy.latex(sympy.sympify(fullderivative(i[2],dvar,0)))+'$\\newline $'
+					#print previous_stuff+'\hspace*{'+str(i[0])+'em} '+i[1]+sympy.latex(sympy.sympify(fullderivative(i[2],dvar,0)))+'$\\newpage '
+					previous_stuff = previous_stuff+'\hspace*{'+str(i[0])+'em} '+i[1]+sympy.latex(sympy.sympify(fullderivative(i[2],dvar,0)))+'$\\newline $'
+					show_all[idx+rangemin]= '\\newline $\hspace*{'+str(i[0])+'em} '+i[1]+'$'
+					print allof(show_all)+'\\newpage '
+					show_all[idx+rangemin]= '\\newline $\hspace*{'+str(i[0])+'em} '+i[1]+sympy.latex(sympy.sympify(fullderivative(i[2],dvar,0)))+'$'
+					print allof(show_all)+'\\newpage '
 				else:
-					print previous_stuff+i[1]+'$\\newpage '
-					previous_stuff = previous_stuff+i[1]+'$\\newline $'
+					#print previous_stuff+'\hspace*{'+str(i[0])+'em} '+i[1]+'$\\newpage '
+					previous_stuff = previous_stuff+'\hspace*{'+str(i[0])+'em} '+i[1]+'$\\newline $'
+					show_all[idx+rangemin]= '\\newline $\hspace*{'+str(i[0])+'em} '+i[1]+'$'
+					print allof(show_all)+'\\newpage '
+					
 				
 		solve_steps(allsteps,allsteps[solveid][5][0],1,dvar)
 
@@ -398,18 +421,25 @@ def solve_steps(allsteps,solveid,show_children,dvar):
 			if show_children==1:
 				for idx,i in enumerate(allsteps[rangemin:rangemax]):
 					if i[0]==level+1:
-						print previous_stuff+i[1]+onestepderivative(i[2],dvar,0)+'$\\newpage '
-						previous_stuff = previous_stuff+i[1]+onestepderivative(i[2],dvar,0)+'$\\newline $'
+						#print previous_stuff+'\hspace*{'+str(i[0])+'em} '+i[1]+onestepderivative(i[2],dvar,0)+'$\\newpage '
+						previous_stuff = previous_stuff+'\hspace*{'+str(i[0])+'em} '+i[1]+sympy.latex(sympy.sympify(fullderivative(i[2],dvar,0)))+'$\\newline $'
+						show_all[idx+rangemin]= '\\newline $\hspace*{'+str(i[0])+'em} '+i[1]+'$'
+						print allof(show_all)+'\\newpage '
+						show_all[idx+rangemin]= '\\newline $\hspace*{'+str(i[0])+'em} '+i[1]+sympy.latex(sympy.sympify(fullderivative(i[2],dvar,0)))+'$'
+						print allof(show_all)+'\\newpage '
 			allsteps[solveid][3]="solved"
-			print previous_stuff+allsteps[solveid][1]+sympy.latex(sympy.sympify(fullderivative(allsteps[solveid][2],dvar,0)))+'$\\newpage '
-			previous_stuff = previous_stuff+allsteps[solveid][1]+sympy.latex(sympy.sympify(fullderivative(allsteps[solveid][2],dvar,0)))+'$\\newline $'
+			#print previous_stuff+'\hspace*{'+str(allsteps[solveid][0])+'em} '+allsteps[solveid][1]+sympy.latex(sympy.sympify(fullderivative(allsteps[solveid][2],dvar,0)))+'$\\newpage '
+			previous_stuff = previous_stuff+'\hspace*{'+str(allsteps[solveid][0])+'em} '+allsteps[solveid][1]+sympy.latex(sympy.sympify(fullderivative(allsteps[solveid][2],dvar,0)))+'$\\newline $'
+			show_all[solveid]= '\\newline $\hspace*{'+str(allsteps[solveid][0])+'em} '+allsteps[solveid][1]+sympy.latex(sympy.sympify(fullderivative(allsteps[solveid][2],dvar,0)))+'$'
+			print allof(show_all)+'\\newpage '
 		if allsteps[solveid][6]!='':
 			solve_steps(allsteps,allsteps[solveid][6],1,dvar)
 		else:
 			if allsteps[solveid][7]!=0:
 				solve_steps(allsteps,allsteps[solveid][7],0,dvar)
 			else:
-				return "done"
+				show_all[0]= '\\newline $\hspace*{'+str(allsteps[0][0])+'em} '+allsteps[0][1]+sympy.latex(sympy.sympify(fullderivative(allsteps[0][2],dvar,0)))+'$'
+				print allof(show_all)+'\\newpage '
 
 
 solve_steps(allsteps,0,1,dvar)
