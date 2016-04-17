@@ -6,7 +6,7 @@ def myslatex(input_string):
 def slatex(f):
 	return myslatex(sympy.sympify(post_clean(f)))
 
-def productrule(inputexpression,allparts,dvar):
+def productrulew(inputexpression,allparts,dvar,wrongness):
 	#print inputexpression
 	openpar = 0
 	isbreak = 0

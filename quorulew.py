@@ -1,4 +1,4 @@
-from productrule import productrule
+from productrulew import productrulew
 from clean import cleanpar
 import sympy
 from clean import post_clean
@@ -8,8 +8,8 @@ def myslatex(input_string):
 def slatex(f):
 	return myslatex(sympy.sympify(post_clean(f)))
 
-def quorule(inputexpression,dvar):
-	h = productrule(inputexpression,[],dvar)
+def quorulew(inputexpression,dvar,wrongness):
+	h = productrulew(inputexpression,[],dvar,wrongness)
 	if len(h)==1:
 		#do quotient
 		openpar = 0

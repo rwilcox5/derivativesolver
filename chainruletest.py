@@ -1,13 +1,6 @@
 from powerrule import powerrule
 from trigrule import trigrule
 from expolog import exporule
-import sympy
-from clean import post_clean
-def myslatex(input_string):
-	input_string = sympy.latex(input_string).replace('holdfordydx','\\frac{dy}{dx}')
-	return input_string
-def slatex(f):
-	return myslatex(sympy.sympify(post_clean(f)))
 
 def fullparen(input_string):
 	openpar = 0
@@ -39,22 +32,20 @@ def fullparen(input_string):
 			except:
 				return False
 
-def checkifdvar(input_string,dvar,idvar):
+def checkifdvar(input_string,dvar):
 	spart = input_string
 	for sstr in ['sin','cos','log','tan','cot','sec','csc','cot','sqrt','arc','ln']:
 		spart=spart.replace(sstr,'')
 	if spart.find(dvar)>-1:
 		return True
-	elif spart.find(idvar)>-1:
-		return True
 	else:
 		return False
-def checkpower(inputexpression,dvar,idvar):
+def checkpower(inputexpression,dvar):
 	#print inputexpression, 'hhhh'
 	power_spots = []
 	if inputexpression[0:5]=='sqrt(':
 		if fullparen(inputexpression[4:]):
-			return [True,powerrule(inputexpression,inputexpression[4:],idvar)[1],inputexpression[4:],'Apply the chain rule to <div class="katex_div_il">f(g('+dvar+'))</div> with <div class="katex_div_il">f(U)=sqrt(U)</div> and <div class="katex_div_il">g('+dvar+')='+slatex(inputexpression[4:])+'</div>']
+			return [True,powerrule(inputexpression,inputexpression[4:])[1],inputexpression[4:]]
 	for idx,i in enumerate(inputexpression):
 		if i == '^':
 			power_spots.append(idx-1)
@@ -62,9 +53,9 @@ def checkpower(inputexpression,dvar,idvar):
 		for i in power_spots:
 			if fullparen(inputexpression[:i+1]):
 				if fullparen(inputexpression[i+2:]):
-					if checkifdvar(inputexpression[:i+1],dvar,idvar):
-						if not checkifdvar(inputexpression[i+2:],dvar,idvar):
-							return [True,powerrule(inputexpression,inputexpression[:i+1],idvar)[1],inputexpression[:i+1],'Apply the chain rule to <div class="katex_div_il">f(g('+dvar+'))</div> with <div class="katex_div_il">f(U)=U^'+inputexpression[i+2:]+'</div> and <div class="katex_div_il">g('+dvar+')='+slatex(inputexpression[:i+1])+'</div>']
+					if checkifdvar(inputexpression[:i+1],dvar):
+						if not checkifdvar(inputexpression[i+2:],dvar):
+							return [True,powerrule(inputexpression,inputexpression[:i+1])[1],inputexpression[:i+1]]
 						else:
 							return [False,inputexpression]
 					else:
@@ -78,7 +69,7 @@ def checkpower(inputexpression,dvar,idvar):
 	else:
 		return [False,inputexpression]
 
-def checkexpo(inputexpression,dvar,idvar):
+def checkexpo(inputexpression,dvar):
 	power_spots = []
 	for idx,i in enumerate(inputexpression):
 		if i == '^':
@@ -87,9 +78,9 @@ def checkexpo(inputexpression,dvar,idvar):
 		for i in power_spots:
 			if fullparen(inputexpression[:i+1]):
 				if fullparen(inputexpression[i+2:]):
-					if not checkifdvar(inputexpression[:i+1],dvar,idvar):
-						if checkifdvar(inputexpression[i+2:],dvar,idvar):
-							return [True,exporule(inputexpression,inputexpression[i+2:])[1],inputexpression[i+2:],'Apply the chain rule to <div class="katex_div_il">f(g('+dvar+'))</div> with <div class="katex_div_il">f(U)='+inputexpression[:i+1]+'^U</div> and <div class="katex_div_il">g('+dvar+')='+slatex(inputexpression[i+2:])+'</div>']
+					if not checkifdvar(inputexpression[:i+1],dvar):
+						if checkifdvar(inputexpression[i+2:],dvar):
+							return [True,exporule(inputexpression,inputexpression[i+2:])[1],inputexpression[i+2:]]
 						else:
 							return [False,inputexpression]
 					else:
@@ -103,12 +94,12 @@ def checkexpo(inputexpression,dvar,idvar):
 	else:
 		return [False,inputexpression]
 
-def checklog(inputexpression,dvar,idvar):
+def checklog(inputexpression,dvar):
 	if inputexpression[:4]=='log(':
 		if fullparen(inputexpression[3:]):
 			the_exponent = inputexpression[4:len(inputexpression)-1]
-			if checkifdvar(the_exponent,dvar,idvar):
-				return [True,'1/('+the_exponent+')',the_exponent,'Apply the chain rule to <div class="katex_div_il">f(g('+dvar+'))</div> with <div class="katex_div_il">f(U)=log(U)</div> and <div class="katex_div_il">g('+dvar+')='+slatex(the_exponent)+'</div>']
+			if checkifdvar(the_exponent,dvar):
+				return [True,'1/('+the_exponent+')',the_exponent]
 			else:
 				return [False, inputexpression]
 		else:
@@ -116,32 +107,32 @@ def checklog(inputexpression,dvar,idvar):
 	elif inputexpression[:3]=='ln(':
 		if fullparen(inputexpression[2:]):
 			the_exponent = inputexpression[3:len(inputexpression)-1]
-			if checkifdvar(the_exponent,dvar,idvar):
-				return [True,'1/('+the_exponent+')',the_exponent,'Apply the chain rule to <div class="katex_div_il">f(g('+dvar+'))</div> with <div class="katex_div_il">f(U)=ln(U)</div> and <div class="katex_div_il">g('+dvar+')='+slatex(the_exponent)+'</div>']
+			if checkifdvar(the_exponent,dvar):
+				return [True,'1/('+the_exponent+')',the_exponent]
 			else:
 				return [False, inputexpression]
 		else:
 			return [False, inputexpression]
 	else:
 		return [False,inputexpression]
-def checktrig(inputexpression,dvar,idvar,tf):
+def checktrig(inputexpression,dvar,tf):
 	if inputexpression[:4]==tf+'(':
 		if fullparen(inputexpression[3:]):
 			the_exponent = inputexpression[4:len(inputexpression)-1]
-			if checkifdvar(the_exponent,dvar,idvar):
-				return [True,trigrule(inputexpression,the_exponent)[1],the_exponent,'Apply the chain rule to <div class="katex_div_il">f(g('+dvar+'))</div> with <div class="katex_div_il">f(U)='+slatex(tf)+'(U)</div> and <div class="katex_div_il">g('+dvar+')='+slatex(the_exponent)+'</div>']
+			if checkifdvar(the_exponent,dvar):
+				return [True,trigrule(inputexpression,the_exponent)[1],the_exponent]
 			else:
 				return [False, inputexpression]
 		else:
 			return [False, inputexpression]
 	else:
 		return [False,inputexpression]
-def checkitrig(inputexpression,dvar,idvar,tf):
+def checkitrig(inputexpression,dvar,tf):
 	if inputexpression[:7]==tf+'(':
 		if fullparen(inputexpression[6:]):
 			the_exponent = inputexpression[7:len(inputexpression)-1]
-			if checkifdvar(the_exponent,dvar,idvar):
-				return [True,trigrule(inputexpression,the_exponent)[1],the_exponent,'Apply the chain rule to <div class="katex_div_il">f(g('+dvar+'))</div> with <div class="katex_div_il">f(U)='+slatex(tf)+'(U)</div> and <div class="katex_div_il">g('+dvar+')='+slatex(the_exponent)+'</div>']
+			if checkifdvar(the_exponent,dvar):
+				return [True,trigrule(inputexpression,the_exponent)[1],the_exponent]
 			else:
 				return [False, inputexpression]
 		else:
@@ -149,15 +140,15 @@ def checkitrig(inputexpression,dvar,idvar,tf):
 	else:
 		return [False,inputexpression]
 
-def chainrule(inputexpression,dvar,idvar):
-	expo_chain = checkexpo(inputexpression,dvar,idvar)
-	log_chain = checklog(inputexpression,dvar,idvar)
-	power_chain = checkpower(inputexpression,dvar,idvar)
+def chainrule(inputexpression,dvar):
+	expo_chain = checkexpo(inputexpression,dvar)
+	log_chain = checklog(inputexpression,dvar)
+	power_chain = checkpower(inputexpression,dvar)
 	trig_chain = []
 	for tf in ['sin','cos','tan','cot','sec','csc']:
-		trig_chain.append(checktrig(inputexpression,dvar,idvar,tf))
+		trig_chain.append(checktrig(inputexpression,dvar,tf))
 	for itf in ['arcsin','arccos','arctan','arccot','arcsec','arccsc']:
-		trig_chain.append(checkitrig(inputexpression,dvar,idvar,itf))
+		trig_chain.append(checkitrig(inputexpression,dvar,itf))
 	if expo_chain[0]:
 		return expo_chain
 	elif log_chain[0]:

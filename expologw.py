@@ -36,18 +36,18 @@ def fullparen(input_string):
 			except:
 				return False
 
-def logrule(inputexpression,dvar):
+def logrulew(inputexpression,dvar,wrongness):
 	if inputexpression[:4]=='log(':
 		if inputexpression[4:4+len(dvar)]==dvar:
 			if inputexpression[4+len(dvar):]==')':
-				return [True,'1/('+dvar+')', 'Apply the logarithm rule.']
+				return [True,[['1/('+dvar+')','Correct']], 'Apply the logarithm rule.']
 			else:
 				return [False,inputexpression]
 		elif inputexpression[4:2+len(dvar)]==dvar[1:len(dvar)-1]:
 			if dvar[0]=='(':
 				if dvar[len(dvar)-1]==')':
 					if inputexpression[2+len(dvar):]==')':
-						return [True,'1/'+dvar, 'Apply the logarithm rule.']
+						return [True,[['1/'+dvar,'Correct']], 'Apply the logarithm rule.']
 					else:
 						return [False,inputexpression]
 				else:
@@ -56,7 +56,7 @@ def logrule(inputexpression,dvar):
 				return [False,inputexpression]
 		elif inputexpression[4:6+len(dvar)]=='('+dvar+')':
 			if inputexpression[6+len(dvar):]==')':
-				return [True,'1/('+dvar+')','Apply the logarithm rule.']
+				return [True,[['1/('+dvar+')','Correct']],'Apply the logarithm rule.']
 			else:
 				return [False,inputexpression]
 		else:
@@ -64,14 +64,14 @@ def logrule(inputexpression,dvar):
 	elif inputexpression[:3]=='ln(':
 		if inputexpression[3:3+len(dvar)]==dvar:
 			if inputexpression[3+len(dvar):]==')':
-				return [True,'1/('+dvar+')', 'Apply the logarithm rule.']
+				return [True,[['1/('+dvar+')','Correct']], 'Apply the logarithm rule.']
 			else:
 				return [False,inputexpression]
 		elif inputexpression[3:1+len(dvar)]==dvar[1:len(dvar)-1]:
 			if dvar[0]=='(':
 				if dvar[len(dvar)-1]==')':
 					if inputexpression[1+len(dvar):]==')':
-						return [True,'1/'+dvar, 'Apply the logarithm rule.']
+						return [True,[['1/'+dvar,'Correct']], 'Apply the logarithm rule.']
 					else:
 						return [False,inputexpression]
 				else:
@@ -80,7 +80,7 @@ def logrule(inputexpression,dvar):
 				return [False,inputexpression]
 		elif inputexpression[3:5+len(dvar)]=='('+dvar+')':
 			if inputexpression[5+len(dvar):]==')':
-				return [True,'1/('+dvar+')', 'Apply the logarithm rule.']
+				return [True,[['1/('+dvar+')','Correct']], 'Apply the logarithm rule.']
 			else:
 				return [False,inputexpression]
 		else:
@@ -88,7 +88,7 @@ def logrule(inputexpression,dvar):
 	else:
 		return [False,inputexpression]
 
-def exporule(inputexpression,dvar):
+def exporulew(inputexpression,dvar,wrongness):
 	found_one = False
 	openpar = 0
 	for idx,i in enumerate(inputexpression):
@@ -115,9 +115,9 @@ def exporule(inputexpression,dvar):
 					if inputexpression[len(the_base)+2:len(the_base)+2+len(dvar)]==dvar:
 						if inputexpression[len(the_base)+2+len(dvar):]==')':
 							if the_base == 'e':
-								return [True,inputexpression,'Apply the exponential rule.']
+								return [True,[[inputexpression,'Correct'],['('+dvar+')*e^('+dvar+'-1)','Used power rule instead of exponential']],'Apply the exponential rule.']
 							else:
-								return [True,inputexpression+'log('+the_base+')', 'Apply the exponential rule to <div class="katex_div_il">a^'+dvar+'</div> with the base <div class="katex_div_il">a='+the_base+'</div>.']
+								return [True,[[inputexpression+'log('+the_base+')','Correct'],[inputexpression,'Forgot to multiply by the log of the base'],['('+dvar+')*'+the_base+'^('+dvar+'-1)','Used power rule instead of exponential']], 'Apply the exponential rule to <div class="katex_div_il">a^'+dvar+'</div> with the base <div class="katex_div_il">a='+the_base+'</div>.']
 						else:
 							return [False,inputexpression]
 					elif inputexpression[len(the_base)+2:len(the_base)+len(dvar)]==dvar[len(the_base):len(dvar)-1]:
@@ -125,9 +125,9 @@ def exporule(inputexpression,dvar):
 							if dvar[len(dvar)-1]==')':
 								if inputexpression[len(the_base)+len(dvar):]==')':
 									if the_base == 'e':
-										return [True,inputexpression,'Apply the exponential rule.']
+										return [True,[[inputexpression,'Correct'],['('+dvar+')*e^('+dvar+'-1)','Used power rule instead of exponential']],'Apply the exponential rule.']
 									else:
-										return [True,inputexpression+'log('+the_base+')', 'Apply the exponential rule to <div class="katex_div_il">a^'+dvar+'</div> with the base <div class="katex_div_il">a='+the_base+'</div>.']
+										return [True,[[inputexpression+'log('+the_base+')','Correct'],[inputexpression,'Forgot to multiply by the log of the base'],['('+dvar+')*'+the_base+'^('+dvar+'-1)','Used power rule instead of exponential']], 'Apply the exponential rule to <div class="katex_div_il">a^'+dvar+'</div> with the base <div class="katex_div_il">a='+the_base+'</div>.']
 								else:
 									return [False,inputexpression]
 							else:
@@ -137,9 +137,9 @@ def exporule(inputexpression,dvar):
 					elif inputexpression[len(the_base)+2:len(the_base)+4+len(dvar)]=='('+dvar+')':
 						if inputexpression[len(the_base)+4+len(dvar):]==')':
 							if the_base == 'e':
-								return [True,inputexpression,'Apply the exponential rule.']
+								return [True,[[inputexpression,'Correct'],['('+dvar+')*e^('+dvar+'-1)','Used power rule instead of exponential']],'Apply the exponential rule.']
 							else:
-								return [True,inputexpression+'log('+the_base+')', 'Apply the exponential rule to <div class="katex_div_il">a^'+dvar+'</div> with the base <div class="katex_div_il">a='+the_base+'</div>.']
+								return [True,[[inputexpression+'log('+the_base+')','Correct'],[inputexpression,'Forgot to multiply by the log of the base'],['('+dvar+')*'+the_base+'^('+dvar+'-1)','Used power rule instead of exponential']], 'Apply the exponential rule to <div class="katex_div_il">a^'+dvar+'</div> with the base <div class="katex_div_il">a='+the_base+'</div>.']
 						else:
 							return [False,inputexpression]
 					else:
@@ -148,9 +148,9 @@ def exporule(inputexpression,dvar):
 					if inputexpression[len(the_base)+1:len(the_base)+1+len(dvar)]==dvar:
 						if len(inputexpression)==len(dvar)+len(the_base)+1:
 							if the_base == 'e':
-								return [True,inputexpression,'Apply the exponential rule.']
+								return [True,[[inputexpression,'Correct'],['('+dvar+')*e^('+dvar+'-1)','Used power rule instead of exponential']],'Apply the exponential rule.']
 							else:
-								return [True,inputexpression+'log('+the_base+')', 'Apply the exponential rule to <div class="katex_div_il">a^'+dvar+'</div> with the base <div class="katex_div_il">a='+the_base+'</div>.']
+								return [True,[[inputexpression+'log('+the_base+')','Correct'],[inputexpression,'Forgot to multiply by the log of the base'],['('+dvar+')*'+the_base+'^('+dvar+'-1)','Used power rule instead of exponential']], 'Apply the exponential rule to <div class="katex_div_il">a^'+dvar+'</div> with the base <div class="katex_div_il">a='+the_base+'</div>.']
 						else:
 							return [False,inputexpression]
 					elif inputexpression[len(the_base)+1:len(the_base)-1+len(dvar)]==dvar[len(the_base):len(dvar)-1]:
@@ -158,9 +158,9 @@ def exporule(inputexpression,dvar):
 							if dvar[len(dvar)-1]==')':
 								if len(inputexpression)==len(dvar):
 									if the_base == 'e':
-										return [True,inputexpression,'Apply the exponential rule.']
+										return [True,[[inputexpression,'Correct'],['('+dvar+')*e^('+dvar+'-1)','Used power rule instead of exponential']],'Apply the exponential rule.']
 									else:
-										return [True,inputexpression+'log('+the_base+')', 'Apply the exponential rule to <div class="katex_div_il">a^'+dvar+'</div> with the base <div class="katex_div_il">a='+the_base+'</div>.']
+										return [True,[[inputexpression+'log('+the_base+')','Correct'],[inputexpression,'Forgot to multiply by the log of the base'],['('+dvar+')*'+the_base+'^('+dvar+'-1)','Used power rule instead of exponential']], 'Apply the exponential rule to <div class="katex_div_il">a^'+dvar+'</div> with the base <div class="katex_div_il">a='+the_base+'</div>.']
 								else:
 									return [False,inputexpression]
 							else:
@@ -178,12 +178,12 @@ def exporule(inputexpression,dvar):
 	else:
 		return [False,inputexpression]
 
-def expologrule(inputexpression,dvar):
-	log_it = logrule(inputexpression,dvar)
+def expologrulew(inputexpression,dvar,wrongness):
+	log_it = logrulew(inputexpression,dvar,wrongness)
 	if log_it[0]:
 		return log_it
 	else:
-		exp_it = exporule(inputexpression,dvar)
+		exp_it = exporulew(inputexpression,dvar,wrongness)
 		if exp_it[0]:
 			return exp_it
 		else:

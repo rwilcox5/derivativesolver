@@ -1,5 +1,5 @@
 
-def constantmultiple(inputexpression,dvar,idvar):
+def constantmultiple(inputexpression,dvar,idvar,wrongness):
 	openpar = 0
 	isbreak = 0
 	cancelnext = 0
@@ -88,7 +88,7 @@ def constantmultiple(inputexpression,dvar,idvar):
 		the_not_constant = inputexpression
 	return [allparts, the_not_constant]
 
-def pulloutconstant(inputexpression,dvar,idvar):
+def pulloutconstant(inputexpression,dvar,idvar,wrongness):
 	openpar = 0
 	isbreak = 0
 	for idx,i in enumerate(inputexpression):
@@ -110,7 +110,7 @@ def pulloutconstant(inputexpression,dvar,idvar):
 					isneg = 1
 					break
 	if isbreak != 1:
-		returnedarr = constantmultiple(inputexpression,dvar,idvar)
+		returnedarr = constantmultiple(inputexpression,dvar,idvar,wrongness)
 		returned = returnedarr[0]
 		nonconstant = returnedarr[1]
 		the_constant_num = []

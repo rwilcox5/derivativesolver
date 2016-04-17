@@ -1,4 +1,4 @@
-def sumrule(inputexpression,allparts,dvar):
+def sumrulew(inputexpression,allparts,dvar,wrongness):
 	openpar = 0
 	isbreak = 0
 	for idx,i in enumerate(inputexpression):
@@ -24,7 +24,7 @@ def sumrule(inputexpression,allparts,dvar):
 		rightpart = inputexpression[breakhere+1:]
 		allparts.append(leftpart)
 		allparts.append(isneg)
-		nextparts = sumrule(rightpart,allparts,dvar)
+		nextparts = sumrulew(rightpart,allparts,dvar,wrongness)
 		#for i in nextparts:
 		#	allparts.append(i)
 

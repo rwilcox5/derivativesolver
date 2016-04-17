@@ -1,45 +1,24 @@
+import sympy
+from clean import post_clean
+def myslatex(input_string):
+	input_string = sympy.latex(input_string).replace('holdfordydx','\\frac{dy}{dx}')
+	return input_string
+def slatex(f):
+	return myslatex(sympy.sympify(post_clean(f)))
 
-def indtrigrule(inputexpression,dvar,tf,dtf):
-	
-	if inputexpression[:4]==tf+'(':
-		if inputexpression[4:4+len(dvar)]==dvar:
-			if inputexpression[4+len(dvar):]==')':
-				if dtf not in ['-csccot','sectan']:
-					return [True,dtf+'('+dvar+')']
-				else:
-					return [True,dtf[:len(dtf)-3]+'('+dvar+')'+dtf[len(dtf)-3:]+'('+dvar+')']
-			else:
-				return [False,inputexpression]
-		elif inputexpression[4:2+len(dvar)]==dvar[1:len(dvar)-1]:
-			if dvar[0]=='(':
-				if dvar[len(dvar)-1]==')':
-					if inputexpression[2+len(dvar):]==')':
-						if dtf not in ['-csccot','sectan']:
-							return [True,dtf+'('+dvar+')']
-						else:
-							return [True,dtf[:len(dtf)-3]+'('+dvar+')'+dtf[len(dtf)-3:]+'('+dvar+')']
-					else:
-						return [False,inputexpression]
-				else:
-					return [False,inputexpression]
-			else:
-				return [False,inputexpression]
-		elif inputexpression[4:6+len(dvar)]=='('+dvar+')':
-			if inputexpression[6+len(dvar):]==')':
-				if dtf not in ['-csccot','sectan']:
-					return [True,dtf+'('+dvar+')']
-				else:
-					return [True,dtf[:len(dtf)-3]+'('+dvar+')'+dtf[len(dtf)-3:]+'('+dvar+')']
-			else:
-				return [False,inputexpression]
-		else:
-			return [False,inputexpression]
+def invtrigrule(inputexpression,dvar,tf,dtf):
+	if inputexpression == tf:
+		return [True,dtf,'Apply the rule for the derivative of <div class="katex_div_il">'+slatex(tf)+'</div>.']
 	else:
 		return [False,inputexpression]
-	return [False,inputexpression]
+
 def trigrule(inputexpression,dvar):
-	for tf,dtf in [['sin','cos'],['cos','-sin'],['tan','sec^2'],['csc','-csccot'],['sec','sectan'],['cot','-csc^2']]:
-		the_d = indtrigrule(inputexpression,dvar,tf,dtf)
+	for tf,dtf in [['sin('+dvar+')','cos('+dvar+')'],['cos('+dvar+')','-sin('+dvar+')'],['tan('+dvar+')','sec('+dvar+')^2'],['csc('+dvar+')','-csc('+dvar+')'+'cot('+dvar+')'],['sec('+dvar+')','sec('+dvar+')'+'tan('+dvar+')'],['cot('+dvar+')','-csc('+dvar+')^2']]:
+		the_d = invtrigrule(inputexpression,dvar,tf,dtf)
+		if the_d[0]:
+			return the_d
+	for tf,dtf in [['arcsin('+dvar+')','1/(sqrt(1-('+dvar+')^2))'],['arccos('+dvar+')','-1/(sqrt(1-('+dvar+')^2))'],['arctan('+dvar+')','1/(1+('+dvar+')^2)'],['arccot('+dvar+')','-1/(1+('+dvar+')^2)'],['arcsec('+dvar+')','1/(abs(x)*sqrt(('+dvar+')^2-1))'],['arccsc('+dvar+')','-1/(abs(x)*sqrt(('+dvar+')^2-1))']]:
+		the_d = invtrigrule(inputexpression,dvar,tf,dtf)
 		if the_d[0]:
 			return the_d
 	return [False,inputexpression]

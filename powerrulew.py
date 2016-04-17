@@ -28,7 +28,7 @@ def fullparen(input_string):
 				return True
 			except:
 				return False
-def powerrule(inputexpression,dvar,idvar):
+def powerrulew(inputexpression,dvar,idvar,wrongness):
 	#print "pr", inputexpression
 	#print inputexpression, dvar
 	if inputexpression == 'sqrt('+dvar+')':
@@ -41,7 +41,7 @@ def powerrule(inputexpression,dvar,idvar):
 					#print "heree"
 					the_exponent = inputexpression[len(dvar)+1:]
 					#if the_exponent.find(dvar,0)==-1:
-					return [True,cleanpar(str(the_exponent)+'*'+dvar+'^('+str(the_exponent)+'-1)',dvar),'Apply the power rule to <div class="katex_div_il">'+dvar+'^a</div> with <div class="katex_div_il">a='+str(the_exponent)+'</div>']
+					return [True,[[cleanpar(str(the_exponent)+'*'+dvar+'^('+str(the_exponent)+'-1)',dvar),'Correct'],[cleanpar(str(the_exponent)+'*'+dvar+'^('+str(the_exponent)+'+1)',dvar),'Subtract one in the exponent, not add one.'],[cleanpar('1/'+str(the_exponent)+'*'+dvar+'^('+str(the_exponent)+'-1)',dvar),'Multiply by the exponent, not divide']],'Apply the power rule to <div class="katex_div_il">'+dvar+'^a</div> with <div class="katex_div_il">a='+str(the_exponent)+'</div>']
 				else:
 					return [False,inputexpression]
 			else:
@@ -49,11 +49,11 @@ def powerrule(inputexpression,dvar,idvar):
 		else:
 			return [False,inputexpression]
 	elif inputexpression == dvar:
-		return [True,'1', 'The derivative of '+dvar+' is 1']
+		return [True,[['1','Correct'],['0','The derivative of '+dvar+' is 1 not 0']], 'The derivative of '+dvar+' is 1']
 	elif inputexpression == idvar:
-		return [True,'holdfordydx','The derivative of '+idvar+' is dy/dx since y is a function of x']
+		return [True,[['holdfordydx','Correct'],['1','The derivative of y is dy/dx'],['0','The derivative of y is dy/dx']],'The derivative of '+idvar+' is dy/dx since y is a function of x']
 	elif inputexpression.find(dvar,0)<0:
-		return [True,'0', 'The derivative of a constant is 0']
+		return [True,[['0','Correct'],[inputexpression,'The derivative of a constant is 0']], 'The derivative of a constant is 0']
 	else:
 		return [False,inputexpression]
 
